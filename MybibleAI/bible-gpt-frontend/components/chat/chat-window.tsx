@@ -33,6 +33,7 @@ interface ChatHistory {
 export function ChatWindow() {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarKey, setSidebarKey] = useState(0)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -97,6 +98,8 @@ export function ChatWindow() {
     }
 
     localStorage.setItem("bible-gpt-chats", JSON.stringify(chats))
+    // Force sidebar to refresh
+    setSidebarKey(prev => prev + 1)
   }
 
   const loadChat = (chatId: string) => {
@@ -321,6 +324,7 @@ export function ChatWindow() {
     <div className="flex h-full">
       {/* Sidebar */}
       <ChatSidebar
+        key={sidebarKey}
         currentChatId={currentChatId}
         onSelectChat={loadChat}
         onNewChat={startNewChat}
