@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login Flow</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .section {
+            background: #16213e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #0f3460;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1a4d7a;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid #0f3460;
+            background: #0f1419;
+            color: white;
+            width: 200px;
+        }
+        pre {
+            background: #0f1419;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+    </style>
+</head>
+<body>
+    <h1>🔍 MatchHang Login Flow Debugger</h1>
+    
+    <div class="section">
+        <h2>Step 1: Login</h2>
+        <input type="email" id="email" placeholder="Email" value="debug@test.com">
+        <input type="password" id="password" placeholder="Password" value="Debug123!">
+        <button onclick="testLogin()">Test Login</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>Step 2: Check LocalStorage</h2>
+        <button onclick="checkStorage()">Check Storage</button>
+        <div id="storageResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>Step 3: Test API with Token</h2>
+        <button onclick="testUserMe()">Test /v1/users/me</button>
+        <button onclick="testMatches()">Test /v1/matches/calendar/matches</button>
+        <div id="apiResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>Step 4: Clear Storage</h2>
+        <button onclick="clearStorage()">Clear LocalStorage</button>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:4000';
+
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            resultDiv.innerHTML = '<p>⏳ Logging in...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/v1/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store tokens
+                    localStorage.setItem('access_token', data.access_token);
+                    localStorage.setItem('refresh_token', data.refresh_token);
+                    
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Login successful!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p>Token stored in localStorage</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Login failed: ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        function checkStorage() {
+            const resultDiv = document.getElementById('storageResult');
+            const accessToken = localStorage.getItem('access_token');
+            const refreshToken = localStorage.getItem('refresh_token');
+            
+            if (accessToken) {
+                resultDiv.innerHTML = `
+                    <p class="success">✅ Tokens found in localStorage</p>
+                    <p><strong>Access Token:</strong></p>
+                    <pre>${accessToken}</pre>
+                    <p><strong>Refresh Token:</strong></p>
+                    <pre>${refreshToken}</pre>
+                `;
+            } else {
+                resultDiv.innerHTML = `<p class="error">❌ No tokens in localStorage</p>`;
+            }
+        }
+
+        async function testUserMe() {
+            const resultDiv = document.getElementById('apiResult');
+            const token = localStorage.getItem('access_token');
+            
+            if (!token) {
+                resultDiv.innerHTML = '<p class="error">❌ No token found. Login first!</p>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>⏳ Testing /v1/users/me...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/v1/users/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ /v1/users/me works!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ /v1/users/me failed: ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p>This means the token is invalid or expired</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testMatches() {
+            const resultDiv = document.getElementById('apiResult');
+            const token = localStorage.getItem('access_token');
+            
+            if (!token) {
+                resultDiv.innerHTML = '<p class="error">❌ No token found. Login first!</p>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>⏳ Testing /v1/matches/calendar/matches...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/v1/matches/calendar/matches?start_date=2025-12-04&end_date=2025-12-04`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ Matches endpoint works!</p>
+                        <p>Found ${data.total} matches</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Matches endpoint failed: ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        function clearStorage() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            alert('✅ LocalStorage cleared!');
+        }
+    </script>
+</body>
+</html>

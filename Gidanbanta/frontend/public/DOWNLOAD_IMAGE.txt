@@ -1,0 +1,10 @@
+INSTRUCTIONS TO ADD BACKGROUND IMAGE:
+
+1. Download the image from: https://wallpaperaccess.com/full/780050.jpg
+2. Save it as: stadium-bg.jpg
+3. Place it in this folder: Gidanbanta/frontend/public/
+4. The image will automatically be used as the background
+
+The file path should be: Gidanbanta/frontend/public/stadium-bg.jpg
+
+After adding the image, refresh your browser to see the background.

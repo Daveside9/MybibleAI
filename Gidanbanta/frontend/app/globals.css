@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+:root {
+  --navy: #071226;
+  --primary: #0B6CF1;
+  --cyan: #00C2FF;
+  --success: #32D583;
+  --danger: #FF5964;
+  --warning: #FFA500;
+  --text-primary: #EAF2FF;
+  --text-muted: #93A5C4;
+}
+
+@theme inline {
+  --color-navy: var(--navy);
+  --color-primary: var(--primary);
+  --color-cyan: var(--cyan);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+}
+
+body {
+  background: var(--navy);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: var(--navy);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--cyan);
+}
+
+/* Hide scrollbar for mobile but keep functionality */
+@media (max-width: 768px) {
+  .scrollbar-thin::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-thin {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Live match indicator animations */
+@keyframes live-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes live-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--danger), 0 0 10px var(--danger);
+  }
+  50% {
+    box-shadow: 0 0 10px var(--danger), 0 0 20px var(--danger);
+  }
+}
+
+.live-indicator {
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+.live-badge {
+  animation: live-glow 2s ease-in-out infinite;
+}
